@@ -10,6 +10,7 @@ void main() async{
   Hive.init(document.path);
   Hive.registerAdapter(ParamsAdapter());
   await Hive.openBox<Params>("params");
+  Hive.openBox("image");
   runApp(const MyApp());
 }
 

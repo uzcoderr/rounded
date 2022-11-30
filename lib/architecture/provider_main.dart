@@ -1,9 +1,8 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rounded/model/param.dart';
 import 'package:rounded/model/homework.dart';
 import 'package:rounded/service/local/premium_controller.dart';
@@ -15,45 +14,52 @@ class ProviderMain extends ChangeNotifier {
 
   Dio dio = Dio();
 
-  HomeWork homeWork = HomeWork(title: "HomeWork", caption: "Bu joyda barcha ishtirokchilar \ndarajalari bilan tanushing", valuePro: 0, isPremium: "premium");
+  HomeWork homeWork = HomeWork(
+      title: "HomeWork",
+      caption: "Bu joyda barcha ishtirokchilar \ndarajalari bilan tanushing",
+      valuePro: 0,
+      isPremium: "premium");
 
   List<Params> paramsList = [];
 
-  Future startHive() async{
-    await ApiService().GET_PARMS_INFO().then((value) => {
-      for(var param in value){
-        PremiumControllerDb().save(param),
-        notifyListeners()
-      }
-    });
-    // await PremiumCont.rollerDb().saveObjParam2(params2);
+  Future startHive() async {
+    var dbLength = PremiumControllerDb().get();
+    if (dbLength == 0) {
+      await ApiService().GET_PARMS_INFO().then((value) => {
+            for (var param in value)
+              {PremiumControllerDb().save(param), notifyListeners()}
+          });
+    }
   }
 
   Future _getFilePath(String fileName) async {
-
     final dir = await getApplicationDocumentsDirectory();
 
     return "${dir.path}$fileName";
-
   }
 
-  Future exitPremiumOfHomeWork() async{
+  Future exitPremiumOfHomeWork() async {
     homeWork.isPremium = "notPremium";
     notifyListeners();
   }
 
-  Future initPremiumOfHomeWork() async{
+  Future initPremiumOfHomeWork() async {
     homeWork.isPremium = "premium";
     notifyListeners();
   }
 
-  // Future getHomeWorkInfo()async{
-  //
-  // }
-
   Future initApp() async {
-    ApiService().GET_PARMS_INFO().then(
-        (value) => { paramsList = value.cast<Params>(), notifyListeners()});
+    var dbLength = PremiumControllerDb().get();
+    if (dbLength == 0) {
+      ApiService().GET_PARMS_INFO().then(
+          (value) => {paramsList = value.cast<Params>(), notifyListeners()});
+    }else{
+      var db = Hive.box<Params>("params");
+      for(var index = 0;index < db.keys.length;index++){
+        var e = db.getAt(index);
+        paramsList.add(e!);
+      }
+    }
   }
 
   Future initVideo() async {
@@ -63,9 +69,7 @@ class ProviderMain extends ChangeNotifier {
         notifyListeners();
       })
       ..setLooping(true)
-      ..initialize().then((value) => {
-        notifyListeners()
-      });
+      ..initialize().then((value) => {notifyListeners()});
   }
 
   Future exitPremiumOfIndex(int index) async {
@@ -73,7 +77,7 @@ class ProviderMain extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future initPremium(int index) async{
+  Future initPremium(int index) async {
     paramsList[index].isPremium = "premium";
     notifyListeners();
   }
@@ -104,8 +108,8 @@ class ProviderMain extends ChangeNotifier {
   double progress = 0.0;
 
   Future startDownloading() async {
-
-    const String url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4";
+    const String url =
+        "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4";
 
     const String fileName = "video.mp4";
 
@@ -119,22 +123,6 @@ class ProviderMain extends ChangeNotifier {
         notifyListeners();
       },
       deleteOnError: true,
-    ).then((value) => {
-      print(path)
-    });
-  }
-
-  PermissionStatus _permissionStatus = PermissionStatus.denied;
-
-  Future<void> askStoragePermission() async {
-    debugPrint(" ---------------- Asking for permission...");
-    await Permission.manageExternalStorage.request();
-    if (await Permission.manageExternalStorage.request().isGranted) {
-      PermissionStatus permissionStatus =
-      await Permission.manageExternalStorage.status;
-
-        _permissionStatus = permissionStatus;
-      notifyListeners();
-    }
+    ).then((value) => {print(path)});
   }
 }

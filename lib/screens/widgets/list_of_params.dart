@@ -12,14 +12,10 @@ Widget ListOfParams(ProviderMain providerMain,context){
 
   return ValueListenableBuilder(
     valueListenable: db.listenable(),
-
-
     builder: (context,Box<Params> value, child){
-
       List<int> paramsList = value.keys.cast<int>().toList();
-
       return GridView.builder(
-        itemCount: providerMain.paramsList.length,
+        itemCount: 4,
         shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2), itemBuilder: (
@@ -27,7 +23,7 @@ Widget ListOfParams(ProviderMain providerMain,context){
           int param = paramsList[index];
           Params? params = value.get(param);
         return ItemOfParams(
-            providerMain, index, context, controllerOfParams,params!
+            providerMain, index, context, controllerOfParams,index
         );
       }
       );

@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:rounded/architecture/provider_main.dart';
 import 'package:rounded/model/param.dart';
 
-Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController controller,Params params){
+Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController controller,int indexParamsHive){
 
   // bool visble = true;
 
   return GestureDetector(
     onDoubleTap: (){
       providerMain.initPremium(index);
-      controller.notifyListeners();
+      var name = Hive.box<Params>("params").get(indexParamsHive)!.name;
+      var isPremium = "premium";
+      var valuePro = Hive.box<Params>("params").get(indexParamsHive)!.valuePro;
+      var color = Hive.box<Params>("params").get(indexParamsHive)!.color;
+      var imageUrl = Hive.box<Params>("params").get(indexParamsHive)!.imageUrl;
+      var id = Hive.box<Params>("params").get(indexParamsHive)!.id;
+      Hive.box<Params>("params").putAt(indexParamsHive,Params(name: name, valuePro: valuePro, color: color, imageUrl: imageUrl, isPremium: isPremium, id: id));
     },
     child: Container(
       margin: const EdgeInsets.all(10),
@@ -18,10 +25,10 @@ Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController
               alignment: Alignment.topRight,
               image: AssetImage('assets/image/vector.png')
           ),
-          color: params.color=='red'?
-          Colors.red:params.color=='blue'?Colors.blue:
-          params.color=='green'?Colors.green:
-          params.color=='purpleAccent'?Colors.purpleAccent:Colors.red,
+          color: providerMain.paramsList[index].color=='red'?
+          Colors.red:providerMain.paramsList[index].color=='blue'?Colors.blue:
+          providerMain.paramsList[index].color=='green'?Colors.green:
+          providerMain.paramsList[index].color=='purpleAccent'?Colors.purpleAccent:Colors.red,
           borderRadius: BorderRadius.circular(8)
       ),
       child: Stack(
@@ -30,7 +37,7 @@ Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController
               child: Container(
                 padding: const EdgeInsets.all(15),
                 alignment: Alignment.topLeft,
-                child: Image.asset(params.imageUrl),
+                child: Image.asset(providerMain.paramsList[index].imageUrl),
               )
           ),
           Expanded(
@@ -44,7 +51,7 @@ Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController
                   Padding(
                     padding: const EdgeInsets.only(left: 13),
                     child: Text(
-                      params.name,
+                      providerMain.paramsList[index].name,
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 23
@@ -85,11 +92,15 @@ Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController
           ),
           if (providerMain.paramsList[index].isPremium=='premium')  Expanded(
                 child: GestureDetector(
-                  child: GestureDetector(
                     onLongPress: (){
                       providerMain.exitPremiumOfIndex(index);
-                      controller.notifyListeners();
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(providerMain.paramsList[index].isPremium)));
+                      var name = Hive.box<Params>("params").get(indexParamsHive)!.name;
+                      var isPremium = "notPremium";
+                      var valuePro = Hive.box<Params>("params").get(indexParamsHive)!.valuePro;
+                      var color = Hive.box<Params>("params").get(indexParamsHive)!.color;
+                      var imageUrl = Hive.box<Params>("params").get(indexParamsHive)!.imageUrl;
+                      var id = Hive.box<Params>("params").get(indexParamsHive)!.id;
+                      Hive.box<Params>("params").putAt(indexParamsHive,Params(name: name, valuePro: valuePro, color: color, imageUrl: imageUrl, isPremium: isPremium, id: id));
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -103,7 +114,6 @@ Widget ItemOfParams(ProviderMain providerMain,int index,context,ScrollController
                       ),
                     ),
                   ),
-                )
             ) else const SizedBox.shrink()
         ],
       ),

@@ -1,8 +1,20 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:rounded/model/param.dart';
+import 'package:http/http.dart' as http;
 
 class ApiService{
 
+  String Base_URL = "https://api.unsplash.com";
+  String API_Path = "/photos/random";
+  String token = "mT8hj53DywChJkbscZAN5aHio9v2M9impW_i-VIc7vs";
+
+  Future<String> getRandomImage() async{
+    var uri = Uri.parse("https://api.unsplash.com/photos/random/?client_id=mT8hj53DywChJkbscZAN5aHio9v2M9impW_i-VIc7vs");
+    var response = await http.get(uri);
+    var data = jsonDecode(response.body);
+    return data['urls']['small'];
+  }
 
   Future<List<Params>> GET_PARMS_INFO() async{
     return [
